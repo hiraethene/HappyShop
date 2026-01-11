@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,12 +66,12 @@ public class CustomerModel {
     void addToTrolley(){
         if(theProduct!= null){
 
-            // trolley.add(theProduct) — Product is appended to the end of the trolley.
-            // To keep the trolley organized, add code here or call a method that:
-            //TODO
+            // trolley.add(theProduct) — Product is appended to the end of the trolley
+            // Code here:
             // 1. Merges items with the same product ID (combining their quantities).
             // 2. Sorts the products in the trolley by product ID.
-            trolley.add(theProduct);
+            //trolley.add(theProduct);
+            makeOrganizedTrolley();
             displayTaTrolley = ProductListFormatter.buildString(trolley); //build a String for trolley so that we can show it
         }
         else{
@@ -81,6 +82,27 @@ public class CustomerModel {
         updateView();
     }
 
+    void makeOrganizedTrolley() {
+        // merging items in trolley
+        for(Product p : trolley){
+            if(p.getProductId().equals(theProduct.getProductId())){
+                p.setOrderedQuantity(p.getOrderedQuantity()+ theProduct.getOrderedQuantity());
+                //sorts items by productID
+                sortTrolley();
+                // finishes method early
+                return;
+            }
+        }
+        Product newProduct = new Product(theProduct.getProductId(), theProduct.getProductDescription(),
+                theProduct.getProductImageName(), theProduct.getUnitPrice(), theProduct.getStockQuantity());
+        trolley.add(newProduct);
+        sortTrolley();
+    }
+
+    // sorts items by productID
+    void sortTrolley() {
+        Collections.sort(trolley, (p1, p2) -> p1.getProductId().compareTo(p2.getProductId()));
+    }
     void checkOut() throws IOException, SQLException {
         if(!trolley.isEmpty()){
             // Group the products in the trolley by productId to optimize stock checking
@@ -113,6 +135,17 @@ public class CustomerModel {
                             .append(p.getStockQuantity()).append(" available, ")
                             .append(p.getOrderedQuantity()).append(" requested)\n");
                 }
+                // 1. Remove products with insufficient stock from the trolley.
+                //for(Product p : insufficientProducts) {
+               //     if (theProduct.getProductId().equals(p.getProductId())) {
+               //     trolley.remove(theProduct);
+               //     }
+               // }
+                // 2. Trigger a message window to notify the customer about the insufficient stock, rather than directly changing displayLaSearchResult.
+                //You can use the provided RemoveProductNotifier class and its showRemovalMsg method for this purpose.
+                //remember close the message window where appropriate (using method closeNotifierWindow() of RemoveProductNotifier class)
+                //RemoveProductNotifier insufficientNotifier = new RemoveProductNotifier();
+                //otifier.cusView =
                 theProduct=null;
 
                 //TODO
@@ -182,5 +215,8 @@ public class CustomerModel {
     //for test only
     public ArrayList<Product> getTrolley() {
         return trolley;
+    }
+    public void setTheProduct(Product theProduct) {
+        this.theProduct = theProduct;
     }
 }
