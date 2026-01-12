@@ -167,7 +167,15 @@ public class DerbyRW implements DatabaseRW {
                             System.out.println("After change: " + newStock);
                             System.out.println("Update successful for Product ID: " + product.getProductId());
                         } else {
-                            insufficientProducts.add(product);
+                            Product newProduct = new Product(
+                                    product.getProductId(),
+                                    product.getProductDescription(),
+                                    product.getProductImageName(),
+                                    product.getUnitPrice(),
+                                    product.getStockQuantity()
+                                    );
+                            newProduct.setOrderedQuantity(1);
+                            insufficientProducts.add(newProduct);
                             allSufficient = false; // Mark that there's at least one insufficient product
                             System.out.println("Not enough stock for Product ID: " + product.getProductId());
                         }

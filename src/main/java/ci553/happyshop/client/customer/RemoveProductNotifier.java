@@ -100,7 +100,7 @@ public class RemoveProductNotifier {
         window.setTitle("🛒Products removal notifier");
         window.setScene(scene);
 
-        //get bounds of betterCustomer window which trigers the ProductRemovalNotifier
+        //get bounds of betterCustomer window which triggers the ProductRemovalNotifier
         // so that we can put the ProductRemovalNotifier at a suitable position
         WindowBounds bounds = cusView.getWindowBounds();
         window.setX(bounds.x + bounds.width -WIDTH -10); // Position to the right of warehouse window

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO
+ *
  * You can either directly modify the CustomerModel class to implement the required tasks,
  * or create a subclass of CustomerModel and override specific methods where appropriate.
  */
@@ -38,9 +38,10 @@ public class CustomerModel {
     //SELECT productID, description, image, unitPrice,inStock quantity
     void search() throws SQLException {
         String productId = cusView.tfId.getText().trim();
-        if(!productId.isEmpty()){
+        String productName = cusView.tfName.getText().trim();
+        if(!productId.isEmpty()) {
             theProduct = databaseRW.searchByProductId(productId); //search database
-            if(theProduct != null && theProduct.getStockQuantity()>0){
+            if (theProduct != null && theProduct.getStockQuantity() > 0) {
                 double unitPrice = theProduct.getUnitPrice();
                 String description = theProduct.getProductDescription();
                 int stock = theProduct.getStockQuantity();
@@ -49,12 +50,15 @@ public class CustomerModel {
                 String quantityInfo = stock < 100 ? String.format("\n%d units left.", stock) : "";
                 displayLaSearchResult = baseInfo + quantityInfo;
                 System.out.println(displayLaSearchResult);
-            }
-            else{
-                theProduct=null;
+            } else {
+                theProduct = null;
                 displayLaSearchResult = "No Product was found with ID " + productId;
                 System.out.println("No Product was found with ID " + productId);
             }
+
+        } else if (!productName.isEmpty()) {
+            ArrayList<Product> name = databaseRW.searchByProName(productName);
+
         }else{
             theProduct=null;
             displayLaSearchResult = "Please type ProductID";
@@ -63,9 +67,9 @@ public class CustomerModel {
         updateView();
     }
 
+
     void addToTrolley(){
         if(theProduct!= null){
-
             // trolley.add(theProduct) — Product is appended to the end of the trolley
             // Code here:
             // 1. Merges items with the same product ID (combining their quantities).
@@ -86,7 +90,8 @@ public class CustomerModel {
         // merging items in trolley
         for(Product p : trolley){
             if(p.getProductId().equals(theProduct.getProductId())){
-                p.setOrderedQuantity(p.getOrderedQuantity()+ theProduct.getOrderedQuantity());
+              // p.setOrderedQuantity(p.getOrderedQuantity()+ theProduct.getOrderedQuantity());
+                p.setOrderedQuantity(p.getOrderedQuantity() + 1);
                 //sorts items by productID
                 sortTrolley();
                 // finishes method early
@@ -95,6 +100,7 @@ public class CustomerModel {
         }
         Product newProduct = new Product(theProduct.getProductId(), theProduct.getProductDescription(),
                 theProduct.getProductImageName(), theProduct.getUnitPrice(), theProduct.getStockQuantity());
+        newProduct.setOrderedQuantity(1);
         trolley.add(newProduct);
         sortTrolley();
     }
@@ -136,26 +142,30 @@ public class CustomerModel {
                             .append(p.getOrderedQuantity()).append(" requested)\n");
                 }
                 // 1. Remove products with insufficient stock from the trolley.
-                //for(Product p : insufficientProducts) {
-               //     if (theProduct.getProductId().equals(p.getProductId())) {
-               //     trolley.remove(theProduct);
-               //     }
-               // }
-                // 2. Trigger a message window to notify the customer about the insufficient stock, rather than directly changing displayLaSearchResult.
-                //You can use the provided RemoveProductNotifier class and its showRemovalMsg method for this purpose.
-                //remember close the message window where appropriate (using method closeNotifierWindow() of RemoveProductNotifier class)
-                //RemoveProductNotifier insufficientNotifier = new RemoveProductNotifier();
-                //otifier.cusView =
-                theProduct=null;
-
-                //TODO
+                for(Product p : insufficientProducts) {
+                    for (Product trolleyProduct : trolley)
+                        if (trolleyProduct.getProductId().equals(p.getProductId())) {
+                            int productsLeft = trolleyProduct.getStockQuantity() - p.getOrderedQuantity();
+                            if (productsLeft <= 0) {
+                                trolley.remove(trolleyProduct);
+                            } else {
+                                trolleyProduct.setOrderedQuantity(productsLeft);
+                            }
+                            break;
+                    }
+                }
                 // Add the following logic here:
-                // 1. Remove products with insufficient stock from the trolley.
-                // 2. Trigger a message window to notify the customer about the insufficient stock, rather than directly changing displayLaSearchResult.
-                //You can use the provided RemoveProductNotifier class and its showRemovalMsg method for this purpose.
-                //remember close the message window where appropriate (using method closeNotifierWindow() of RemoveProductNotifier class)
-                displayLaSearchResult = "Checkout failed due to insufficient stock for the following products:\n" + errorMsg.toString();
-                System.out.println("stock is not enough");
+//                // 1. Remove products with insufficient stock from the trolley.
+//                // 2. Trigger a message window to notify the customer about the insufficient stock, rather than directly changing displayLaSearchResult.
+//                //You can use the provided RemoveProductNotifier class and its showRemovalMsg method for this purpose.
+//                //remember close the message window where appropriate (using method closeNotifierWindow() of RemoveProductNotifier class)
+//                displayLaSearchResult = "Checkout failed due to insufficient stock for the following products:\n" + errorMsg.toString();
+//                System.out.println("stock is not enough");
+                RemoveProductNotifier insufficientNotifier = new RemoveProductNotifier();
+                insufficientNotifier.cusView = cusView;
+                insufficientNotifier.showRemovalMsg(errorMsg.toString());
+                displayTaTrolley = ProductListFormatter.buildString(trolley); //build a String for trolley so that we can show it
+                theProduct=null;
             }
         }
         else{
@@ -178,8 +188,12 @@ public class CustomerModel {
                 existing.setOrderedQuantity(existing.getOrderedQuantity() + p.getOrderedQuantity());
             } else {
                 // Make a shallow copy to avoid modifying the original
-                grouped.put(id,new Product(p.getProductId(),p.getProductDescription(),
-                        p.getProductImageName(),p.getUnitPrice(),p.getStockQuantity()));
+                Product copy = new Product(
+                        p.getProductId(),p.getProductDescription(),p.getProductImageName(),
+                        p.getUnitPrice(), p.getStockQuantity()
+                );
+                copy.setOrderedQuantity(p.getOrderedQuantity());
+                grouped.put(id, copy);
             }
         }
         return new ArrayList<>(grouped.values());

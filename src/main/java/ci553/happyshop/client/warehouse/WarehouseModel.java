@@ -62,6 +62,7 @@ public class WarehouseModel {
 
     void doSearch() throws SQLException {
         String keyword = view.tfSearchKeyword.getText().trim();
+        //ArrayList<Product> name;
         if (!keyword.equals("")) {
             productList = databaseRW.searchProduct(keyword);
         }
@@ -71,6 +72,7 @@ public class WarehouseModel {
         }
         updateView(UpdateForAction.BtnSearch);
     }
+
 
     void doDelete() throws SQLException, IOException {
         System.out.println("delete gets called in model");
