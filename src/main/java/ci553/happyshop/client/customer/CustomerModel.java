@@ -60,7 +60,6 @@ public class CustomerModel {
 //        }
 //        updateView(WarehouseModel.UpdateForAction.BtnSearch);
 //    }
-////
 //    //SELECT productID, description, image, unitPrice,inStock quantity
 //    void search() throws SQLException {
 //        String productId = cusView.tfId.getText().trim();
