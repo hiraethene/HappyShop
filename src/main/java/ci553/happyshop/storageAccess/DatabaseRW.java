@@ -45,6 +45,14 @@ public interface DatabaseRW {
     Product searchByProductId(String productId) throws SQLException;
 
     /**
+     * Searches for a product by its name.
+     * @param name the name being searched for.
+     * @return productList a list of products that match the name entered.
+     * @throws SQLException if an error occurs in the database.
+     */
+    ArrayList<Product> searchByProName(String name) throws SQLException;
+
+    /**
      * Attempts to purchase (reduce stocks of) the given list of products.
      * Behavior:
      * - If all requested quantities are available, stocks are reduced and an empty list is returned.

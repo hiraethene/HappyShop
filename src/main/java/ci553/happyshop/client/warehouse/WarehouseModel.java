@@ -72,6 +72,7 @@ public class WarehouseModel {
         updateView(UpdateForAction.BtnSearch);
     }
 
+
     void doDelete() throws SQLException, IOException {
         System.out.println("delete gets called in model");
         Product pro  = view.obrLvProducts.getSelectionModel().getSelectedItem();

@@ -71,7 +71,7 @@ public class DerbyRW implements DatabaseRW {
 
     //helper method
     //search  by product name, return a List of products or null
-    private ArrayList<Product> searchByProName(String name) {
+    public ArrayList<Product> searchByProName(String name) throws SQLException{
         ArrayList<Product> productList = new ArrayList<>();
         String query = "SELECT * FROM ProductTable WHERE LOWER(description) LIKE LOWER(?)";
 
@@ -80,7 +80,7 @@ public class DerbyRW implements DatabaseRW {
 
             stmt.setString(1, "%" + name.toLowerCase() + "%");
 
-            try (ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs    = stmt.executeQuery()) {
                 while (rs.next()) {
                     productList.add(makeProObjFromDbRecord(rs)); // Add all matching products to list
                 }
@@ -167,7 +167,15 @@ public class DerbyRW implements DatabaseRW {
                             System.out.println("After change: " + newStock);
                             System.out.println("Update successful for Product ID: " + product.getProductId());
                         } else {
-                            insufficientProducts.add(product);
+                            Product newProduct = new Product(
+                                    product.getProductId(),
+                                    product.getProductDescription(),
+                                    product.getProductImageName(),
+                                    product.getUnitPrice(),
+                                    product.getStockQuantity()
+                                    );
+                            newProduct.setOrderedQuantity(1);
+                            insufficientProducts.add(newProduct);
                             allSufficient = false; // Mark that there's at least one insufficient product
                             System.out.println("Not enough stock for Product ID: " + product.getProductId());
                         }
